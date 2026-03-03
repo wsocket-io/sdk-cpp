@@ -44,7 +44,7 @@ sudo apt install libwebsocketpp-dev nlohmann-json3-dev libcurl4-openssl-dev libb
 #include <wsocket/wsocket.hpp>
 
 int main() {
-    wsocket::Client client("wss://your-server.com", "your-api-key");
+    wsocket::Client client("wss://node00.wsocket.online", "your-api-key");
 
     client.on_connect([] {
         std::cout << "Connected!" << std::endl;
@@ -100,7 +100,7 @@ ch->on_history([](const wsocket::HistoryResult& result) {
 ## Push Notifications
 
 ```cpp
-wsocket::PushClient push("https://your-server.com", "secret", "app1");
+wsocket::PushClient push("https://node00.wsocket.online", "secret", "app1");
 
 push.register_fcm("device-token", "user-123");
 push.send_to_member("user-123", {{"title", "Hello"}, {"body", "World"}});
