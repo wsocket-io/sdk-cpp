@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake build-essential libwebsockets-dev libcurl4-openssl-dev
+          sudo apt-get install -y cmake build-essential libboost-all-dev nlohmann-json3-dev libcurl4-openssl-dev
       - name: Configure
         run: cmake -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
       - name: Build
