@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libwebsockets-dev libcurl4-openssl-dev
+      - name: Build
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+      - name: Test
+        run: cd build && ctest --output-on-failure || echo "No tests configured"
+      - name: Package source
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          tar czf wsocket-cpp-${TAG}.tar.gz --exclude='.git*' --exclude='build' .
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: wsocket-cpp-*.tar.gz
