@@ -1,6 +1,9 @@
 # wSocket SDK for C++
 
-Official C++ SDK for wSocket — realtime pub/sub, presence, history, and push notifications.
+Official C++ SDK for [wSocket](https://wsocket.io) — realtime pub/sub, presence, history, and push notifications.
+
+[![GitHub Release](https://img.shields.io/github/v/release/wsocket-io/sdk-cpp)](https://github.com/wsocket-io/sdk-cpp/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Installation
 
