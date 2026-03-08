@@ -160,6 +160,10 @@ public:
     int broadcast(const json& payload);
     int unregister(const std::string& member_id, const std::string& platform = "");
     int delete_subscription(const std::string& subscription_id);
+    int add_channel(const std::string& subscription_id, const std::string& channel);
+    int remove_channel(const std::string& subscription_id, const std::string& channel);
+    std::string get_vapid_key();
+    std::string list_subscriptions(const std::string& member_id);
 
 private:
     std::string base_url_;
@@ -167,6 +171,10 @@ private:
     std::string app_id_;
 
     int post(const std::string& path, const json& body);
+    int request(const std::string& method, const std::string& url,
+                const json& body = nullptr);
+    std::string request_with_response(const std::string& method,
+                                       const std::string& url);
 };
 
 // ─── Client ─────────────────────────────────────────────────

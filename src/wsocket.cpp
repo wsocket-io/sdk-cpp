@@ -183,12 +183,17 @@ PushClient::PushClient(const std::string& base_url, const std::string& token,
     : base_url_(base_url), token_(token), app_id_(app_id) {}
 
 int PushClient::post(const std::string& path, const json& body) {
+    return request("POST", base_url_ + "/api/push/" + path, body);
+}
+
+int PushClient::request(const std::string& method, const std::string& url,
+                        const json& body) {
     CURL* curl = curl_easy_init();
     if (!curl) return -1;
 
-    std::string url = base_url_ + "/api/push/" + path;
-    std::string body_str = body.dump();
+    std::string body_str = body.is_null() ? "" : body.dump();
     std::string auth = "Bearer " + token_;
+    std::string response_data;
 
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, "Content-Type: application/json");
@@ -197,7 +202,19 @@ int PushClient::post(const std::string& path, const json& body) {
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_str.c_str());
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str());
+
+    if (!body_str.empty()) {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_str.c_str());
+    }
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+        +[](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
+            auto* s = static_cast<std::string*>(userp);
+            s->append(static_cast<char*>(contents), size * nmemb);
+            return size * nmemb;
+        });
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
 
     CURLcode res = curl_easy_perform(curl);
 
@@ -205,6 +222,38 @@ int PushClient::post(const std::string& path, const json& body) {
     curl_easy_cleanup(curl);
 
     return (res == CURLE_OK) ? 0 : -1;
+}
+
+std::string PushClient::request_with_response(const std::string& method,
+                                               const std::string& url) {
+    CURL* curl = curl_easy_init();
+    if (!curl) return "{}";
+
+    std::string auth = "Bearer " + token_;
+    std::string response_data;
+
+    struct curl_slist* headers = nullptr;
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    headers = curl_slist_append(headers, ("Authorization: " + auth).c_str());
+    headers = curl_slist_append(headers, ("X-App-Id: " + app_id_).c_str());
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+        +[](void* contents, size_t size, size_t nmemb, void* userp) -> size_t {
+            auto* s = static_cast<std::string*>(userp);
+            s->append(static_cast<char*>(contents), size * nmemb);
+            return size * nmemb;
+        });
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+
+    CURLcode res = curl_easy_perform(curl);
+
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+
+    return (res == CURLE_OK) ? response_data : "{}";
 }
 
 int PushClient::register_fcm(const std::string& device_token, const std::string& member_id) {
@@ -236,7 +285,26 @@ int PushClient::unregister(const std::string& member_id, const std::string& plat
 }
 
 int PushClient::delete_subscription(const std::string& subscription_id) {
-    return post("unregister", {{"subscriptionId", subscription_id}});
+    std::string url = base_url_ + "/api/push/subscriptions/" + subscription_id;
+    return request("DELETE", url);
+}
+
+int PushClient::add_channel(const std::string& subscription_id, const std::string& channel) {
+    return post("channels/add", {{"subscriptionId", subscription_id}, {"channel", channel}});
+}
+
+int PushClient::remove_channel(const std::string& subscription_id, const std::string& channel) {
+    return post("channels/remove", {{"subscriptionId", subscription_id}, {"channel", channel}});
+}
+
+std::string PushClient::get_vapid_key() {
+    std::string url = base_url_ + "/api/push/vapid-key";
+    return request_with_response("GET", url);
+}
+
+std::string PushClient::list_subscriptions(const std::string& member_id) {
+    std::string url = base_url_ + "/api/push/subscriptions?memberId=" + member_id;
+    return request_with_response("GET", url);
 }
 
 // ─── Client ─────────────────────────────────────────────────
