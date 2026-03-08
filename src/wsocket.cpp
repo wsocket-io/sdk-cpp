@@ -235,6 +235,10 @@ int PushClient::unregister(const std::string& member_id, const std::string& plat
     return post("unregister", body);
 }
 
+int PushClient::delete_subscription(const std::string& subscription_id) {
+    return post("unregister", {{"subscriptionId", subscription_id}});
+}
+
 // ─── Client ─────────────────────────────────────────────────
 
 Client::Client(const std::string& url, const std::string& api_key, Options options)

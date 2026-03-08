@@ -159,6 +159,7 @@ public:
     int send_to_member(const std::string& member_id, const json& payload);
     int broadcast(const json& payload);
     int unregister(const std::string& member_id, const std::string& platform = "");
+    int delete_subscription(const std::string& subscription_id);
 
 private:
     std::string base_url_;
