@@ -108,6 +108,16 @@ wsocket::PushClient push("https://node00.wsocket.online", "secret", "app1");
 push.register_fcm("device-token", "user-123");
 push.send_to_member("user-123", {{"title", "Hello"}, {"body", "World"}});
 push.broadcast({{"title", "News"}, {"body", "Update available"}});
+
+// Channel targeting
+push.add_channel("subscription-id", "alerts");
+push.remove_channel("subscription-id", "alerts");
+
+// VAPID key
+std::string vapid_key = push.get_vapid_key();
+
+// List subscriptions
+std::string subs = push.list_subscriptions("user-123");
 ```
 
 ## Requirements
