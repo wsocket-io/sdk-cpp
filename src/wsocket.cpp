@@ -290,11 +290,11 @@ int PushClient::delete_subscription(const std::string& subscription_id) {
 }
 
 int PushClient::add_channel(const std::string& subscription_id, const std::string& channel) {
-    return post("channels/add", {{"subscriptionId", subscription_id}, {"channel", channel}});
+    return post("channels/add", {{"memberId", subscription_id}, {"channel", channel}});
 }
 
 int PushClient::remove_channel(const std::string& subscription_id, const std::string& channel) {
-    return post("channels/remove", {{"subscriptionId", subscription_id}, {"channel", channel}});
+    return post("channels/remove", {{"memberId", subscription_id}, {"channel", channel}});
 }
 
 std::string PushClient::get_vapid_key() {
